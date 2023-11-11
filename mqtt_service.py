@@ -6,7 +6,7 @@ from paho.mqtt import client as mqtt_client
 # MQTT Client
 broker = 'ts.ewbk.de'
 port = 1883
-topic = "/hack/shellyem3-C8C9A3705CFC"
+topic = "hack/SMA 01B8.3015653785/TotalActivePower"
 client_id = f'raspi4-energymanagement'
 
 # InfluxDB Client
