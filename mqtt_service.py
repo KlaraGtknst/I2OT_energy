@@ -44,7 +44,7 @@ def write_data(write_api, device_topic:str, payload:dict):
     del payload["FeatureType"]
 
     for key in payload.keys():
-        point.field(key, payload[key])
+        point = point.field(key, payload[key])
     write_api.write(BUCKET, ORG, point)
 
 def subscribe(client: mqtt_client, write_api):
@@ -86,9 +86,15 @@ def subscribe(client: mqtt_client, write_api):
 
 def connect_influxdb():
     '''connect to influxdb'''
-    write_client = influxdb_client.InfluxDBClient(url=URL, token=TOKEN, org=ORG)
-    write_api = write_client.write_api(write_options=SYNCHRONOUS)
-    return write_api
+    logging.info(f"Connecting to InfluxDB {URL} on Org {ORG} with Token: {TOKEN}")
+    try:
+        write_client = influxdb_client.InfluxDBClient(url=URL, token=TOKEN, org=ORG)
+        write_api = write_client.write_api(write_options=SYNCHRONOUS)
+        return write_api
+    except Exception as e:
+        logging.error(e)
+        logging.error("Error connecting to InfluxDB")
+        exit(1)
 
 
 def run():
