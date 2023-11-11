@@ -86,6 +86,7 @@ def subscribe(client: mqtt_client, write_api):
 
 def connect_influxdb():
     '''connect to influxdb'''
+    logging.info(f"Connecting to InfluxDB {URL} on Org {ORG} with Token: {TOKEN}")
     try:
         write_client = influxdb_client.InfluxDBClient(url=URL, token=TOKEN, org=ORG)
         write_api = write_client.write_api(write_options=SYNCHRONOUS)
