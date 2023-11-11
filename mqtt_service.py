@@ -25,7 +25,10 @@ def wirte_data(write_api, device_topic, payload):
 
     print(f"Device: {device_id}-{device_name}-{device_type} send data: {payload}")
     
-    point = influxdb_client.Point(device_name).tag("device_id", device_id).tag("device_type", device_type).tag("device_name", device_name).time(time.time_ns(), WritePrecision.NS)
+    point = influxdb_client.Point(payload["FeatureType"]).tag("device_id", device_id).tag("device_type", device_type).tag("device_name", device_name).time(time.time_ns(), WritePrecision.NS)
+
+    del payload["FeatureType"]
+
     for key in payload.keys():
         point.field(key, payload[key])
     write_api.write(BUCKET, ORG, point)
