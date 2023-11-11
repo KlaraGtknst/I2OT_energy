@@ -13,6 +13,7 @@ def connect_mqtt():
         else:
             print("Failed to connect, return code %d\n", rc)
     # Set Connecting Client ID
+    print(f"Connecting to MQTT Broker {BROKER}:{PORT} with Client ID: {CLIENT_ID}")
     client = mqtt_client.Client(CLIENT_ID)
     client.on_connect = on_connect
     client.connect(BROKER, PORT)
