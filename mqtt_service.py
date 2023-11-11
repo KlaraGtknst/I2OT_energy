@@ -116,7 +116,6 @@ def init_logging():
 if __name__ == '__main__':
     init_logging()
     run()
-    exit_str = ""
-    
-    while exit_str not in ['q', 'quit']:
-        exit_str = input("Enter 'q' or 'quit' to exit.\n")
+
+    while True:
+        time.sleep(0.001)
