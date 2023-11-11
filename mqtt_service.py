@@ -18,7 +18,7 @@ def connect_mqtt():
     client.connect(BROKER, PORT)
     return client
 
-def wirte_data(device_topic, payload):
+def wirte_data(write_api, device_topic, payload):
     device_id = TOPIC_LOOKUP[device_topic]
     device_type = DEVICE_TYPE[device_id]
     device_name = DEVICE_LOOKUP[device_id]
@@ -30,10 +30,10 @@ def wirte_data(device_topic, payload):
         point.field(key, payload[key])
     write_api.write(BUCKET, ORG, point)
 
-def subscribe(client: mqtt_client):
-    def on_message(client, userdata, msg):
+def subscribe(client: mqtt_client, write_api):
+    def on_message(client, userdata, msg, write_api=write_api):
         try:
-            wirte_data( msg.topic.split('/')[1], json.loads(msg.payload.decode()))
+            wirte_data(write_api, msg.topic.split('/')[1], json.loads(msg.payload.decode()))
         except Exception as e:
             print(e)
             print(f"Message: {msg.topic} {msg.payload.decode()}")
@@ -71,8 +71,8 @@ def connect_influxdb():
 def run():
     mqtt_client = connect_mqtt()
     mqtt_client.loop_start()
-    connect_influxdb()
-    subscribe(mqtt_client)
+    write_api = connect_influxdb()
+    subscribe(mqtt_client, write_api)
 
 if __name__ == '__main__':
     run()
