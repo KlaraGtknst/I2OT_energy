@@ -58,20 +58,22 @@ def subscribe(client: mqtt_client, write_api):
             print(e)
             print(f"Message: {msg.topic} {msg.payload.decode()}")
             pass
-    
-    def subscribe_to_topic(client:mqtt_client, main_topic:str, sub_topic:str):
-        try:
-            topic = f"{BASETOPIC}/{main_topic}/{sub_topic}"
-            client.subscribe(topic)
-        except Exception as e:
-            print(e)
-            print(f"Topic: {topic}")
-            pass
         
     def subscribe_to_specfic_topic(client, device_type:str):
-        for meter_topic in list(MQTT_TOPICS[device_type].values()):
-          for subtopic in list(MQTT_SUBTOPICS[device_type].values()):
-              subscribe_to_topic(client, meter_topic, subtopic)
+        try:
+            for device_topic in list(MQTT_TOPICS[device_type].values()):
+                for subtopic in list(MQTT_SUBTOPICS[device_type].values()):
+                        topic = f"{BASETOPIC}/{device_topic}/{subtopic}"
+                        try:
+                            client.subscribe(topic)
+                        except Exception as e:
+                            print(e)
+                            print(f"Error subscribing device: {device_topic} with topic: {topic}")
+                            pass
+        except Exception as e:
+            print(e)
+            print(f"Error subscribing to {device_type}")
+            pass
 
     subscribe_to_specfic_topic(client=client, device_type="meter")
     subscribe_to_specfic_topic(client=client, device_type="inverter")
