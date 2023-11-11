@@ -79,5 +79,6 @@ def run():
 
 if __name__ == '__main__':
     run()
-    while True:
-        next
+    exit_str = ""
+    while exit_str not in ['q', 'quit']:
+        exit_str = input("Enter 'q' or 'quit' to exit.\n")
