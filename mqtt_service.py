@@ -1,7 +1,9 @@
+import datetime
 import influxdb_client, os, time
 from influxdb_client import InfluxDBClient, Point, WritePrecision
 from influxdb_client.client.write_api import SYNCHRONOUS
 from paho.mqtt import client as mqtt_client
+import logging
 from constants import *
 import json
 
@@ -14,10 +16,10 @@ def connect_mqtt() -> mqtt_client:
     '''
     def on_connect(client, userdata, flags, rc):
         if rc == 0:
-            print("Connected to MQTT Broker!")
+            logging.info("Connected to MQTT Broker!")
         else:
-            print("Failed to connect, return code %d\n", rc)
-    print(f"Connecting to MQTT Broker {BROKER}:{PORT} with Client ID: {CLIENT_ID}")
+            logging.error("Failed to connect, return code %d\n", rc)
+    logging.info(f"Connecting to MQTT Broker {BROKER}:{PORT} with Client ID: {CLIENT_ID}")
     client = mqtt_client.Client(CLIENT_ID)
     client.on_connect = on_connect
     client.connect(BROKER, PORT)
@@ -35,7 +37,7 @@ def write_data(write_api, device_topic:str, payload:dict):
     device_type = DEVICE_TYPE[device_id]
     device_name = DEVICE_LOOKUP[device_id]
 
-    print(f"Device: {device_id}-{device_name}-{device_type} send data: {payload}")
+    logging.debug(f"Device: {device_id}-{device_name}-{device_type} send data: {payload}")
     
     point = influxdb_client.Point(payload["FeatureType"]).tag("device_id", device_id).tag("device_type", device_type).tag("device_name", device_name).time(time.time_ns(), WritePrecision.NS)
 
@@ -55,8 +57,8 @@ def subscribe(client: mqtt_client, write_api):
         try:
             write_data(write_api=write_api, device_topic=msg.topic.split('/')[1], payload=json.loads(msg.payload.decode()))
         except Exception as e:
-            print(e)
-            print(f"Message: {msg.topic} {msg.payload.decode()}")
+            logging.error(e)
+            logging.error(f"Message: {msg.topic} {msg.payload.decode()}")
             pass
     
     def subscribe_to_topic(client:mqtt_client, main_topic:str, sub_topic:str):
@@ -64,8 +66,8 @@ def subscribe(client: mqtt_client, write_api):
             topic = f"{BASETOPIC}/{main_topic}/{sub_topic}"
             client.subscribe(topic)
         except Exception as e:
-            print(e)
-            print(f"Topic: {topic}")
+            logging.error(e)
+            logging.error(f"Topic: {topic}")
             pass
         
     def subscribe_to_specfic_topic(client, device_type:str):
@@ -97,8 +99,22 @@ def run():
     write_api = connect_influxdb()
     subscribe(mqtt_client, write_api)
 
+def init_logging():
+    '''
+    Initialize logging.
+    The log file is saved in the logs folder.
+    The log messages are also printed to the console (stderr).
+    '''
+    if not os.path.exists('logs'):
+        os.mkdir('logs')
+    file_name = 'logs/mqtt_service_{}.log'.format(datetime.datetime.now().isoformat())
+    logging.basicConfig(filename=file_name, encoding='utf-8', level=logging.DEBUG, format='%(asctime)s %(message)s')
+    logging.getLogger().addHandler(logging.StreamHandler()) # print to console
+
 if __name__ == '__main__':
+    init_logging()
     run()
     exit_str = ""
+    
     while exit_str not in ['q', 'quit']:
         exit_str = input("Enter 'q' or 'quit' to exit.\n")
