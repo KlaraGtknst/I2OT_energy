@@ -62,3 +62,8 @@ DEVICE_TYPE = {
     "inverter_001": "inverter",
     "inverter_002": "inverter",
 }
+
+# InfluxDB Fields
+FIELDS_LOOKUP = {
+    
+}

@@ -23,19 +23,30 @@ def wirte_data(device_topic, payload):
     device_type = DEVICE_TYPE[device_id]
     device_name = DEVICE_LOOKUP[device_id]
 
-    print(f"Device: {device_id} - {device_type} - {device_name}")
-    print(f"Payload: {payload} - {type(payload)}")
-
+    print(f"Device: {device_id}-{device_name}-{device_type} send data: {payload}")
+    
+    point = influxdb_client.Point(device_name).tag("device_id", device_id).tag("device_type", device_type).tag("device_name", device_name).time(time.time_ns(), WritePrecision.NS)
+    for key in payload.keys():
+        point.field(key, payload[key])
+    write_api.write(BUCKET, ORG, point)
 
 def subscribe(client: mqtt_client):
     def on_message(client, userdata, msg):
-        print(f"Received `{msg.payload.decode()}` from `{msg.topic}` topic")
-        wirte_data( msg.topic.split('/')[1], json.loads(msg.payload.decode()))
+        try:
+            wirte_data( msg.topic.split('/')[1], json.loads(msg.payload.decode()))
+        except Exception as e:
+            print(e)
+            print(f"Message: {msg.topic} {msg.payload.decode()}")
+            pass
     
     def subscribe_to_topic(client:mqtt_client, main_topic, sub_topic):
-        topic = f"{BASETOPIC}/{main_topic}/{sub_topic}"
-        client.subscribe(topic)
-        client.on_message = on_message
+        try:
+            topic = f"{BASETOPIC}/{main_topic}/{sub_topic}"
+            client.subscribe(topic)
+        except Exception as e:
+            print(e)
+            print(f"Topic: {topic}")
+            pass
 
     for meter in MQTT_TOPICS["meter"]:
         meter_topic = MQTT_TOPICS["meter"][meter]
@@ -48,6 +59,8 @@ def subscribe(client: mqtt_client):
         for subtopic_name in MQTT_SUBTOPICS["inverter"]:
             subtopic = MQTT_SUBTOPICS["inverter"][subtopic_name]
             subscribe_to_topic(client, inverter_topic, subtopic)
+    
+    client.on_message = on_message
 
 def connect_influxdb():
     write_client = influxdb_client.InfluxDBClient(url=URL, token=TOKEN, org=ORG)
@@ -60,8 +73,6 @@ def run():
     mqtt_client.loop_start()
     connect_influxdb()
     subscribe(mqtt_client)
-
-
 
 if __name__ == '__main__':
     run()
