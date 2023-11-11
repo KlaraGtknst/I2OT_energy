@@ -4,6 +4,7 @@ from influxdb_client.client.write_api import SYNCHRONOUS
 from paho.mqtt import client as mqtt_client
 from constants import *
 
+
 def connect_mqtt():
     def on_connect(client, userdata, flags, rc):
         if rc == 0:
@@ -20,8 +21,15 @@ def subscribe(client: mqtt_client):
     def on_message(client, userdata, msg):
         print(f"Received `{msg.payload.decode()}` from `{msg.topic}` topic")
 
-    client.subscribe(TOPIC)
-    client.on_message = on_message
+    for meter in MQTT_TOPICS["meters"]:
+        topic = MQTT_TOPICS["meters"][meter]
+        client.subscribe(topic)
+        client.on_message = on_message
+    
+    for inverter in MQTT_TOPICS["inverters"]:
+        topic = MQTT_TOPICS["inverters"][inverter]
+        client.subscribe(topic)
+        client.on_message = on_message
 
 def connect_influxdb():
     write_client = influxdb_client.InfluxDBClient(url=URL, token=TOKEN, org=ORG)
@@ -34,6 +42,8 @@ def run():
     mqtt_client.loop_start()
     connect_influxdb()
     subscribe(mqtt_client)
+
+
 
 if __name__ == '__main__':
     run()
