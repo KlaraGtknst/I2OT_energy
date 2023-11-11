@@ -5,7 +5,7 @@ from random import randint
 BROKER = 'ts.ewbk.de'
 PORT = 1883
 BASETOPIC = "hack"
-CLIENT_ID = f'raspi4-energymanagement-{randint(0, 1000)}'
+CLIENT_ID = f'raspi4-energymanagement-{randint(0, 1000)}'   # unique client_id, bc duplicates are kicked
 
 # InfluxDB Client
 TOKEN = os.environ.get("INFLUXDB_TOKEN")
@@ -66,5 +66,4 @@ DEVICE_TYPE = {
 
 # InfluxDB Fields
 FIELDS_LOOKUP = {
-
 }

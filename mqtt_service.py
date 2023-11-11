@@ -6,20 +6,31 @@ from constants import *
 import json
 
 
-def connect_mqtt():
+def connect_mqtt() -> mqtt_client:
+    '''
+    Connect to MQTT Broker.
+    Broker address and port are defined in constants.py.
+    :return: mqtt_client
+    '''
     def on_connect(client, userdata, flags, rc):
         if rc == 0:
             print("Connected to MQTT Broker!")
         else:
             print("Failed to connect, return code %d\n", rc)
-    # Set Connecting Client ID
     print(f"Connecting to MQTT Broker {BROKER}:{PORT} with Client ID: {CLIENT_ID}")
     client = mqtt_client.Client(CLIENT_ID)
     client.on_connect = on_connect
     client.connect(BROKER, PORT)
     return client
 
-def wirte_data(write_api, device_topic, payload):
+def write_data(write_api, device_topic:str, payload:dict):
+    '''
+    :param write_api: influxdb_client.write_api
+    :param device_topic: device name from MQTT message, will be converted to device_id
+    :param payload: dict
+    Write data to InfluxDB.
+    The parameters bucket and organization are defined in constants.py.
+    '''
     device_id = TOPIC_LOOKUP[device_topic]
     device_type = DEVICE_TYPE[device_id]
     device_name = DEVICE_LOOKUP[device_id]
@@ -35,15 +46,20 @@ def wirte_data(write_api, device_topic, payload):
     write_api.write(BUCKET, ORG, point)
 
 def subscribe(client: mqtt_client, write_api):
+    '''
+    :param client: mqtt_client
+    :param write_api: influxdb_client.write_api
+    Subscribe to all MQTT topics (inverter and meter).
+    '''
     def on_message(client, userdata, msg, write_api=write_api):
         try:
-            wirte_data(write_api, msg.topic.split('/')[1], json.loads(msg.payload.decode()))
+            write_data(write_api=write_api, device_topic=msg.topic.split('/')[1], payload=json.loads(msg.payload.decode()))
         except Exception as e:
             print(e)
             print(f"Message: {msg.topic} {msg.payload.decode()}")
             pass
     
-    def subscribe_to_topic(client:mqtt_client, main_topic, sub_topic):
+    def subscribe_to_topic(client:mqtt_client, main_topic:str, sub_topic:str):
         try:
             topic = f"{BASETOPIC}/{main_topic}/{sub_topic}"
             client.subscribe(topic)
@@ -51,28 +67,31 @@ def subscribe(client: mqtt_client, write_api):
             print(e)
             print(f"Topic: {topic}")
             pass
+        
+    def subscribe_to_specfic_topic(client, device_type:str):
+        for meter_topic in list(MQTT_TOPICS[device_type].values()):
+          for subtopic in list(MQTT_SUBTOPICS[device_type].values()):
+              subscribe_to_topic(client, meter_topic, subtopic)
 
-    for meter in MQTT_TOPICS["meter"]:
-        meter_topic = MQTT_TOPICS["meter"][meter]
-        for subtopic_name in MQTT_SUBTOPICS["meter"]:
-            subtopic = MQTT_SUBTOPICS["meter"][subtopic_name]
-            subscribe_to_topic(client, meter_topic, subtopic)
-    
-    for inverter in MQTT_TOPICS["inverter"]:
-        inverter_topic = MQTT_TOPICS["inverter"][inverter]
-        for subtopic_name in MQTT_SUBTOPICS["inverter"]:
-            subtopic = MQTT_SUBTOPICS["inverter"][subtopic_name]
-            subscribe_to_topic(client, inverter_topic, subtopic)
+    subscribe_to_specfic_topic(client=client, device_type="meter")
+    subscribe_to_specfic_topic(client=client, device_type="inverter")
     
     client.on_message = on_message
 
+
+
 def connect_influxdb():
+    '''connect to influxdb'''
     write_client = influxdb_client.InfluxDBClient(url=URL, token=TOKEN, org=ORG)
     write_api = write_client.write_api(write_options=SYNCHRONOUS)
     return write_api
 
 
 def run():
+    '''
+    Connect to MQTT Broker, connects, subscribes and writes to InfluxDB.
+    Is called once at the start of the script.
+    '''
     mqtt_client = connect_mqtt()
     mqtt_client.loop_start()
     write_api = connect_influxdb()
