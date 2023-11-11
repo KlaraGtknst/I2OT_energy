@@ -20,16 +20,23 @@ def connect_mqtt():
 def subscribe(client: mqtt_client):
     def on_message(client, userdata, msg):
         print(f"Received `{msg.payload.decode()}` from `{msg.topic}` topic")
+    
+    def subscribe_to_topic(client:mqtt_client, main_topic, sub_topic):
+        topic = f"{BASETOPIC}/{main_topic}/{sub_topic}"
+        client.subscribe(topic)
+        client.on_message = on_message
 
     for meter in MQTT_TOPICS["meters"]:
-        topic = MQTT_TOPICS["meters"][meter]
-        client.subscribe(topic)
-        client.on_message = on_message
+        meter_topic = MQTT_TOPICS["meters"][meter]
+        for subtopic_name in MQTT_SUBTOPICS["meters"]:
+            subtopic = MQTT_SUBTOPICS["meters"][subtopic_name]
+            subscribe_to_topic(client, meter_topic, subtopic)
     
     for inverter in MQTT_TOPICS["inverters"]:
-        topic = MQTT_TOPICS["inverters"][inverter]
-        client.subscribe(topic)
-        client.on_message = on_message
+        inverter_topic = MQTT_TOPICS["inverters"][inverter]
+        for subtopic_name in MQTT_SUBTOPICS["inverters"]:
+            subtopic = MQTT_SUBTOPICS["inverters"][subtopic_name]
+            subscribe_to_topic(client, inverter_topic, subtopic)
 
 def connect_influxdb():
     write_client = influxdb_client.InfluxDBClient(url=URL, token=TOKEN, org=ORG)
