@@ -109,7 +109,7 @@ def init_logging():
     '''
     if not os.path.exists('logs'):
         os.mkdir('logs')
-    file_name = 'logs/mqtt_service_{}.log'.format(datetime.datetime.now().isoformat())
+    file_name = 'logs/mqtt_service_{}.log'.format(datetime.datetime.now().isoformat().replace(':', '-'))
     logging.basicConfig(filename=file_name, encoding='utf-8', level=logging.DEBUG, format='%(asctime)s %(message)s')
     logging.getLogger().addHandler(logging.StreamHandler()) # print to console
 
