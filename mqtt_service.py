@@ -44,7 +44,7 @@ def write_data(write_api, device_topic:str, payload:dict):
     del payload["FeatureType"]
 
     for key in payload.keys():
-        point.field(key, payload[key])
+        point = point.field(key, payload[key])
     write_api.write(BUCKET, ORG, point)
 
 def subscribe(client: mqtt_client, write_api):
