@@ -8,16 +8,17 @@ import pandas as pd
 
 class EnergyDataset(Dataset):
 
-    def __init__(self, path, window_size):
+    def __init__(self, path, window_size, predict_window):
         super(EnergyDataset, self).__init__()
         self.data = pd.read_csv(path)
         self.data = self.data[['_value']]
         self.window_size = window_size
+        self.predict_window = predict_window
 
         self.X, self.y = [], []
-        for i in range(len(self.data)-self.window_size):
+        for i in range(len(self.data)-(self.window_size+self.predict_window)):
             feature = self.data[i:i+self.window_size].values.tolist()
-            target = self.data[i+1:i+self.window_size+1].values.tolist()
+            target = self.data[i+self.window_size:i+self.window_size+self.predict_window].values.tolist()
             self.X.append(feature)
             self.y.append(target)
             
@@ -27,7 +28,7 @@ class EnergyDataset(Dataset):
 
 
     def __len__(self):
-        return len(self.data) - self.window_size
+        return len(self.data) - (self.window_size + self.predict_window)
 
 
     def __getitem__(self, index):
