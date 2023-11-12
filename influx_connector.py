@@ -38,10 +38,10 @@ class influxConnector:
         
     def get_data_between(self, start, end, device_id=None, _messurement=None):
         """
-        Get data between two timestamps for a device.
+        Get data in a time range, for instance, "-24h", "0h",  for a device.
         
-        :param start: start timestamp
-        :param end: end timestamp
+        :param start: start time of type string defines the number of hours before the current time, e.g. "-24h"
+        :param end: end time of type string defines the number of hours before the current time, e.g. "0h"
         :param device_id: device id
         :param _messurement: messurement name
         :return: list of data points
@@ -82,10 +82,7 @@ if __name__ == '__main__':
     # print(influx.get_latest_data())
 
     # works:
-    print(influx.get_data_between("-24h", "0h", device_id='inverter_001', _messurement='EnergyMeter'))
-
-    # does not works:
-    # print(influx.get_data_between(1614556800000000000, 1614643200000000000, device_id='inverter_001'))
-    # print(influx.get_data_between(1614556800000000000, 1614643200000000000, _messurement='Battery'))
-    # print(influx.get_data_between(1614556800000000000, 1614643200000000000, 'inverter_001', 'Battery'))
-    #print(influx.get_data_between(1614556800000000000, 1614643200000000000))
+    # print(influx.get_data_between("-24h", "0h", device_id='inverter_001', _messurement='EnergyMeter'))
+    # print(influx.get_data_between("-24h", "0h", device_id='inverter_001'))
+    # print(influx.get_data_between("-24h", "0h", _messurement='Battery'))
+    # print(influx.get_data_between("-24h", "0h"))
