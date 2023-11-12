@@ -1,3 +1,7 @@
 i2ot-env23
 .DS_Store
 __pycache__
+logs/
+__pycache__/
+*.pyc
+csv_exports/
