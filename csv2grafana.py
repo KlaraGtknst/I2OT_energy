@@ -8,11 +8,12 @@ import matplotlib.pyplot as plt
 while True:
     rows,cols = 1000,1   # (number of samples, number of columns)
     data = np.random.rand(rows,cols)
-    tidx = pd.date_range(datetime.now(), periods=rows, freq='s')
+    data = data * 2500
+    tidx = pd.date_range(datetime.now(), periods=rows, freq='15T')
     data_frame = pd.DataFrame(data, columns=['Power'], index=tidx)
     print(data_frame)
 
-    filepath = Path('csv_exports/out.csv')  
+    filepath = Path('/opt/pi-grafana/csv_exports/out.csv')  
     filepath.parent.mkdir(parents=True, exist_ok=True)  
     data_frame.to_csv(filepath)  
 
