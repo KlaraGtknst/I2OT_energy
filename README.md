@@ -41,3 +41,18 @@ The data, i.e. the influxdb server, is stored on a raspberry pi 4.
 The repository is pulled to the rasberry pi and the project is run, i. e. the docker image is started etc., on the raspberry pi.
 The raspberry pi is connected to the local network and thus, can be accessed by other devices in the network via __ssh pi@IPADDR__ 
 (replace __IPADDR__ by the IP address of the raspberry pi in the local network).
+
+
+### Database
+The data of the mqtt broker is stored in the influxdb database.
+The database is used for time series data.
+
+### Visualization
+The data is visualized using Grafana.
+
+### Prognosis
+TODO
+
+
+## License
+TODO
