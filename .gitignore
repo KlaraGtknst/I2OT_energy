@@ -3,3 +3,4 @@ i2ot-env23
 logs/
 __pycache__/
 *.pyc
+csv_exports/
