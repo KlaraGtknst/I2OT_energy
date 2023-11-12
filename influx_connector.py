@@ -29,7 +29,7 @@ class influxConnector:
         :return: query string with filter
         '''
         filter2attr = ['r.device_id', 'r._measurement']
-        filter = [f'{filter2attr[i]} == "' + filter_name + '"' for i,filter_name in enumerate([device_id, _messurement]) if filter_name is not None]
+        filter = [f'{filter2attr[i]} == "' + filter_name + '"' for i, filter_name in enumerate([device_id, _messurement]) if filter_name is not None]
         filter_query = ' and '.join(filter)
         if any([device_id, _messurement]):
             query += ' |> filter(fn: (r) => {}'.format(filter_query) + ')'
