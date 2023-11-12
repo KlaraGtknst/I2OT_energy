@@ -28,23 +28,31 @@ class influxConnector:
         :param _messurement: messurement name
         :return: list of data points
         """
-        prev_filter = False
         query = 'from(bucket: "energydata") |> range(start: ' + str(start) + ', stop: ' + str(end) + ')'
-        if any([device_id, _messurement]):
-            query += ' |> filter(fn: (r) => '
-        if device_id is not None:
-            query += 'r.device_id == "' + device_id + '"'
-            prev_filter = True
-        if _messurement is not None:
-            if prev_filter:
-                query += ' and '
-            query += 'r._measurement == "' + _messurement + '"'
-            prev_filter = True
-        if any([device_id, _messurement]):
-            query += ')'
+
+        query = self.add_filter(device_id, _messurement, query)
+        
         query += '|> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value")'
         result = self.query_api.query_data_frame(query)
         return result
+
+    def add_filter(self, device_id: str, _messurement: str, query: str):
+        '''
+        Adds filter to the query. Auxiliary function for get_data_between and get_latest_data.
+
+        :param device_id: device id
+        :param _messurement: messurement name
+        :param query: query string
+
+        :return: query string with filter
+        '''
+        filter2attr = ['r.device_id', 'r._measurement']
+        filter = [f'{filter2attr[i]} == "' + filter_name + '"' for i,filter_name in enumerate([device_id, _messurement]) if filter_name is not None]
+        filter_query = ' and '.join(filter)
+        if any([device_id, _messurement]):
+            query += ' |> filter(fn: (r) => {}'.format(filter_query) + ')'
+
+        return query
     
     def get_latest_data(self, device_id=None, _messurement=None, interval=None):
         """
@@ -55,27 +63,29 @@ class influxConnector:
         :param interval: interval to go back in time
         :return: latest data point
         """
-        prev_filter = False
         query = 'from(bucket: "energydata") |> range(start: -'
         query += str(interval) if interval is not None else '5m'
         query += ')'
-        if any([device_id, _messurement]):
-            query += ' |> filter(fn: (r) => '
-        if device_id is not None:
-            query += 'r.device_id == "' + device_id + '"'
-            prev_filter = True
-        if _messurement is not None:
-            if prev_filter:
-                query += ' and '
-            query += 'r._measurement == "' + _messurement + '"'
-            prev_filter = True
-        if any([device_id, _messurement]):
-            query += ')'
+
+        query = self.add_filter(device_id, _messurement, query)
+
         query += '|> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value")'
         result = self.query_api.query_data_frame(query)
         return result
 
 if __name__ == '__main__':
     influx = influxConnector()
-    #print(influx.get_data_between(1614556800000000000, 1614643200000000000, 'inverter_001'))
+    # works:
+    # print(influx.get_latest_data(device_id='inverter_001', _messurement='Battery'))
+    # print(influx.get_latest_data(_messurement='Battery'))
+    # print(influx.get_latest_data(device_id='inverter_001'))
+    # print(influx.get_latest_data())
+
+    # works:
+    print(influx.get_data_between(1614556800000000000, 1614643200000000000, device_id='inverter_001', _messurement='Battery'))
+
+    # does not works:
+    # print(influx.get_data_between(1614556800000000000, 1614643200000000000, device_id='inverter_001'))
+    # print(influx.get_data_between(1614556800000000000, 1614643200000000000, _messurement='Battery'))
+    # print(influx.get_data_between(1614556800000000000, 1614643200000000000, 'inverter_001', 'Battery'))
     #print(influx.get_data_between(1614556800000000000, 1614643200000000000))
