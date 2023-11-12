@@ -11,7 +11,7 @@ CLIENT_ID = f'raspi4-energymanagement-{randint(0, 1000)}'   # unique client_id, 
 TOKEN = os.environ.get("INFLUXDB_TOKEN")
 ORG = "I2OT_energy"
 URL = "http://127.0.0.1:8086"
-BUCKET="energydata"
+BUCKET= "energydata"
 
 # MQTT Topics
 MQTT_TOPICS = {
