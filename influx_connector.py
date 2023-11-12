@@ -17,26 +17,8 @@ class influxConnector:
         self.client = InfluxDBClient(url=URL, token=TOKEN, org=ORG)
         self.query_api = self.client.query_api()
         self.write_api = self.client.write_api(write_options=SYNCHRONOUS)
-        
-    def get_data_between(self, start, end, device_id=None, _messurement=None):
-        """
-        Get data between two timestamps for a device.
-        
-        :param start: start timestamp
-        :param end: end timestamp
-        :param device_id: device id
-        :param _messurement: messurement name
-        :return: list of data points
-        """
-        query = 'from(bucket: "energydata") |> range(start: ' + str(start) + ', stop: ' + str(end) + ')'
 
-        query = self.add_filter(device_id, _messurement, query)
-        
-        query += '|> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value")'
-        result = self.query_api.query_data_frame(query)
-        return result
-
-    def add_filter(self, device_id: str, _messurement: str, query: str):
+    def __add_filter(self, device_id: str, _messurement: str, query: str):
         '''
         Adds filter to the query. Auxiliary function for get_data_between and get_latest_data.
 
@@ -53,6 +35,24 @@ class influxConnector:
             query += ' |> filter(fn: (r) => {}'.format(filter_query) + ')'
 
         return query
+        
+    def get_data_between(self, start, end, device_id=None, _messurement=None):
+        """
+        Get data between two timestamps for a device.
+        
+        :param start: start timestamp
+        :param end: end timestamp
+        :param device_id: device id
+        :param _messurement: messurement name
+        :return: list of data points
+        """
+        query = 'from(bucket: "energydata") |> range(start: ' + str(start) + ', stop: ' + str(end) + ')'
+
+        query = self.__add_filter(device_id, _messurement, query)
+        
+        query += '|> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value")'
+        result = self.query_api.query_data_frame(query)
+        return result
     
     def get_latest_data(self, device_id=None, _messurement=None, interval=None):
         """
@@ -67,7 +67,7 @@ class influxConnector:
         query += str(interval) if interval is not None else '5m'
         query += ')'
 
-        query = self.add_filter(device_id, _messurement, query)
+        query = self.__add_filter(device_id, _messurement, query)
 
         query += '|> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value")'
         result = self.query_api.query_data_frame(query)
@@ -82,7 +82,7 @@ if __name__ == '__main__':
     # print(influx.get_latest_data())
 
     # works:
-    print(influx.get_data_between(1614556800000000000, 1614643200000000000, device_id='inverter_001', _messurement='Battery'))
+    print(influx.get_data_between("-24h", "0h", device_id='inverter_001', _messurement='EnergyMeter'))
 
     # does not works:
     # print(influx.get_data_between(1614556800000000000, 1614643200000000000, device_id='inverter_001'))
