@@ -25,7 +25,7 @@ class influxConnector:
 
         :param device_id: device id
         :param _messurement: messurement name
-        :param field: field name
+        :param _field: _field name
         :param query: query string
 
         :return: query string with filter
@@ -46,7 +46,7 @@ class influxConnector:
         :param end: end time of type string defines the number of hours before the current time, e.g. "0h"
         :param device_id: device id
         :param _messurement: messurement name
-        :param _field: field name
+        :param _field: _field name
         :return: list of data points
         """
         query = 'from(bucket: "energydata") |> range(start: ' + str(start) + ', stop: ' + str(end) + ')'
@@ -64,7 +64,7 @@ class influxConnector:
         :param device_id: device id
         :param _messurement: messurement name
         :param interval: interval to go back in time
-        :param _field: field name
+        :param _field: _field name
         :return: latest data point
         """
         query = 'from(bucket: "energydata") |> range(start: -'
