@@ -51,7 +51,7 @@ The database is used for time series data.
 The data is visualized using Grafana.
 
 ### Prognosis
-Both a CNN and a LSTM were used to create prognosis on future energy data.
+Both a CNN and an LSTM were used to create a prognosis on future energy data.
 Some of the results are displayed below:
 ![alt text](https://github.com/klaraGtknst/I2OT/blob/main/15min_prediction_lstm.png?raw=true)
 ![alt text](https://github.com/klaraGtknst/I2OT/blob/main/CNN_15min.png?raw=true)
