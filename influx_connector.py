@@ -5,8 +5,6 @@ from influxdb_client.client.write_api import SYNCHRONOUS
 import pandas as pd
 from constants import *
 
-URL="http://10.23.101.74:8086"
-TOKEN="6AS2vsZ0AZoW-HbG-kXrjR10Uk_x0nZ08ozDlsr-Jm4m-szn1alDVkgzU3B62i_rSnVz8Eck57hXr8G98CEf5Q=="
 
 class influxConnector:
     """
