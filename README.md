@@ -53,9 +53,9 @@ The data is visualized using Grafana.
 ### Prognosis
 Both a CNN and an LSTM were used to create a prognosis on future energy data.
 Some of the results are displayed below:
-![alt text](https://github.com/klaraGtknst/I2OT/blob/main/15min_prediction_lstm.png?raw=true)
-![alt text](https://github.com/klaraGtknst/I2OT/blob/main/CNN_15min.png?raw=true)
-![alt text](https://github.com/klaraGtknst/I2OT/blob/main/CNN_entire_day.png?raw=true)
+![15min prediction lstm](/prognose/plots/15min_prediction_lstm.png)
+![15min prediction CNN](/prognose/plots/CNN_15min.png)
+![entire day prediction CNN](/prognose/plots/CNN_entire_day.png)
 
 ## License
 MIT License
